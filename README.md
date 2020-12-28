@@ -1,0 +1,2 @@
+# Traffic-Monitoring-System-Using-YOLOv3-and-Deep-Sort
+I have used YOLOv3 Algorithm for Vehicle Detection and Deep Sort Algorithm for Vehicle Tracking. After tracking the vehicles I have tried counting the number of vehicles in each lane. This will help us in real life implementations like Toll Booths(To cross check the collection) and Traffic Lanes Rules Monitoring(To check if heavy vehicles are following the proper lanes or not). 
