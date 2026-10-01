@@ -54,14 +54,6 @@ vehicle-tracking run --video traffic.mp4 --output outputs/demo.mp4
 `ffmpeg` is used for H.264 output when available (falls back to OpenCV's `mp4v`). Each run also writes
 `demo.summary.json` and `demo.events.csv` (one row per counted vehicle) next to the video.
 
-Docker:
-
-```bash
-docker build -t vehicle-tracking .
-docker run --rm -v "$PWD/models:/app/models" -v "$PWD/outputs:/app/outputs" -v "$PWD:/data" \
-  vehicle-tracking run --video /data/traffic.mp4 --output outputs/demo.mp4
-```
-
 ## Configure lanes for your own camera
 
 Everything camera-specific lives in [`configs/default.yaml`](configs/default.yaml). Coordinates are
