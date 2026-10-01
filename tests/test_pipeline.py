@@ -80,3 +80,10 @@ def test_missing_video(tmp_path):
         run_pipeline(
             parse_config(CONFIG), MovingBoxDetector(), tmp_path / "nope.mp4", tmp_path / "o.mp4"
         )
+
+
+def test_roi_excludes_detections_outside(video, tmp_path):
+    # ROI covers only the bottom third, so the box never enters it before the tripwire
+    raw = {**CONFIG, "roi": [[0.0, 0.95], [1.0, 0.95], [1.0, 1.0], [0.0, 1.0]]}
+    summary = run_pipeline(parse_config(raw), MovingBoxDetector(), video, tmp_path / "o.mp4")
+    assert summary["total"] == 0

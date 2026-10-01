@@ -25,7 +25,11 @@ render:
   lane_opacity: 0.18
   show_hud: true
 
-# PLACEHOLDER lanes (two side-by-side lanes); replace once a demo video is chosen.
+# Optional: only vehicles whose bottom-centre is inside this polygon are tracked.
+# Here it excludes the oncoming carriageway behind the central barrier.
+roi: [[0.0, 1.0], [0.0, 0.70], [0.36, 0.34], [0.60, 0.30], [1.0, 0.95], [1.0, 1.0]]
+
+# Counting happens when a vehicle's bottom-centre crosses a lane's `line`.
 lanes:
   - name: Left lane
     polygon: [[0.20, 0.45], [0.48, 0.45], [0.48, 0.95], [0.02, 0.95]]

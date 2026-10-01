@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter, defaultdict
+
 import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
@@ -20,7 +22,7 @@ class VehicleTracker:
             max_cosine_distance=config.max_cosine_distance,
             embedder=None,
         )
-        self._labels: dict[int, str] = {}
+        self._votes: dict[int, Counter[str]] = defaultdict(Counter)
 
     def update(self, frame: np.ndarray, detections: list[Detection]) -> list[TrackedVehicle]:
         embeds = self._encoder.encode(frame, detections)
@@ -31,8 +33,12 @@ class VehicleTracker:
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             track_id = int(track.track_id)
-            label = track.get_det_class() or self._labels.get(track_id, "vehicle")
-            self._labels[track_id] = label
+            latest = track.get_det_class()
+            if latest:
+                self._votes[track_id][latest] += 1
+            # Majority vote over the track's lifetime avoids car/truck/bus flicker.
+            votes = self._votes[track_id]
+            label = votes.most_common(1)[0][0] if votes else "vehicle"
             score = track.get_det_conf()
             ltrb = tuple(float(v) for v in track.to_ltrb())
             active.append(

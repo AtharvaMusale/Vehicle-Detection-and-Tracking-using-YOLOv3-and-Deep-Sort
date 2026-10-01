@@ -78,6 +78,12 @@ class Config:
     video: VideoConfig = field(default_factory=VideoConfig)
     render: RenderConfig = field(default_factory=RenderConfig)
     lanes: tuple[LaneConfig, ...] = ()
+    roi: tuple[Point, ...] | None = None  # only vehicles standing inside are tracked
+
+    def build_roi(self, width: int, height: int) -> tuple[Point, ...] | None:
+        if self.roi is None:
+            return None
+        return tuple((x * width, y * height) for x, y in self.roi)
 
     def build_lanes(self, width: int, height: int) -> list[Lane]:
         return [lane.to_lane(width, height, i) for i, lane in enumerate(self.lanes)]
@@ -141,7 +147,8 @@ def parse_config(raw: dict[str, Any], base_dir: Path | None = None) -> Config:
                 color=color,  # type: ignore[arg-type]
             )
         )
-    return Config(detector, tracker, video, render, tuple(lanes))
+    roi = _points(raw["roi"], 3, "roi") if raw.get("roi") else None
+    return Config(detector, tracker, video, render, tuple(lanes), roi)
 
 
 def load_config(path: str | Path) -> Config:

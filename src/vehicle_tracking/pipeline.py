@@ -14,6 +14,7 @@ import numpy as np
 
 from vehicle_tracking.config import Config
 from vehicle_tracking.counter import LaneCounter
+from vehicle_tracking.geometry import point_in_polygon
 from vehicle_tracking.tracker import VehicleTracker
 from vehicle_tracking.types import Detection
 from vehicle_tracking.video_io import VideoReader, VideoWriter
@@ -41,6 +42,7 @@ def run_pipeline(
         raise ValueError("Config defines no lanes; add at least one under 'lanes:'")
     reader = VideoReader(video_path, config.video.process_width, config.video.start_seconds)
     lanes = config.build_lanes(reader.width, reader.height)
+    roi = config.build_roi(reader.width, reader.height)
     counter = LaneCounter(lanes)
     tracker = VehicleTracker(config.tracker)
     renderer = Renderer(config.render, lanes)
@@ -56,7 +58,7 @@ def run_pipeline(
                 if limit and index >= limit:
                     break
                 if index % config.video.detect_every == 0:
-                    detections = detector.detect(frame)
+                    detections = _inside_roi(detector.detect(frame), roi)
                 tracks = tracker.update(
                     frame, detections if index % config.video.detect_every == 0 else []
                 )
@@ -81,6 +83,20 @@ def run_pipeline(
     )
     _write_reports(output_path, summary, counter)
     return summary
+
+
+def _inside_roi(
+    detections: list[Detection], roi: tuple[tuple[float, float], ...] | None
+) -> list[Detection]:
+    """Keep detections whose bottom-centre (road contact point) lies in the ROI."""
+    if roi is None:
+        return detections
+    kept = []
+    for det in detections:
+        left, top, width, height = det.ltwh
+        if point_in_polygon((left + width / 2, top + height), roi):
+            kept.append(det)
+    return kept
 
 
 def _write_reports(output_path: Path, summary: dict[str, object], counter: LaneCounter) -> None:

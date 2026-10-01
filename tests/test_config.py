@@ -35,3 +35,9 @@ def test_rejects_line_with_wrong_point_count():
     }
     with pytest.raises(ValueError, match="exactly 2"):
         parse_config(raw)
+
+
+def test_roi_parsed_and_scaled():
+    cfg = parse_config({"roi": [[0, 0], [1, 0], [1, 1]]})
+    assert cfg.build_roi(200, 100) == ((0.0, 0.0), (200.0, 0.0), (200.0, 100.0))
+    assert parse_config({}).build_roi(200, 100) is None

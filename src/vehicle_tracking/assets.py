@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 import urllib.request
 from pathlib import Path
 
@@ -13,6 +14,13 @@ ASSETS = {
     "yolov3.weights": "https://pjreddie.com/media/files/yolov3.weights",
 }
 EXPECTED_WEIGHTS_BYTES = 248_007_048
+
+
+def _fetch(url: str, destination: Path) -> None:
+    # Some hosts reject urllib's default User-Agent with HTTP 403.
+    request = urllib.request.Request(url, headers={"User-Agent": "vehicle-tracking/1.0"})  # noqa: S310
+    with urllib.request.urlopen(request, timeout=60) as response, destination.open("wb") as out:  # noqa: S310
+        shutil.copyfileobj(response, out, length=1 << 20)
 
 
 def download_assets(models_dir: Path) -> list[Path]:
@@ -26,7 +34,7 @@ def download_assets(models_dir: Path) -> list[Path]:
             continue
         logger.info("Downloading %s from %s", name, url)
         partial = target.with_suffix(target.suffix + ".part")
-        urllib.request.urlretrieve(url, partial)  # noqa: S310 - fixed https URLs above
+        _fetch(url, partial)
         partial.replace(target)
     weights = models_dir / "yolov3.weights"
     if weights.stat().st_size != EXPECTED_WEIGHTS_BYTES:
