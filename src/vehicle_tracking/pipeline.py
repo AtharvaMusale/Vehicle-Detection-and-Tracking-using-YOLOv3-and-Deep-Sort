@@ -10,13 +10,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol
 
-import numpy as np
-
 from vehicle_tracking.config import Config
 from vehicle_tracking.counter import LaneCounter
 from vehicle_tracking.geometry import point_in_polygon
 from vehicle_tracking.tracker import VehicleTracker
-from vehicle_tracking.types import Detection
+from vehicle_tracking.types import Array, Detection
 from vehicle_tracking.video_io import VideoReader, VideoWriter
 from vehicle_tracking.visualize import Renderer
 
@@ -24,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class Detector(Protocol):
-    def detect(self, frame: np.ndarray) -> list[Detection]: ...
+    def detect(self, frame: Array) -> list[Detection]: ...
 
 
 def run_pipeline(

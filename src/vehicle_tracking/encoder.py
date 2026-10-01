@@ -5,7 +5,7 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
-from vehicle_tracking.types import Detection
+from vehicle_tracking.types import Array, Detection
 
 
 class ColorHistogramEncoder:
@@ -18,9 +18,9 @@ class ColorHistogramEncoder:
     BINS = (8, 4, 4)  # 8*4*4 = 128 dimensions
     dim = 128
 
-    def encode(self, frame: np.ndarray, detections: list[Detection]) -> list[np.ndarray]:
+    def encode(self, frame: Array, detections: list[Detection]) -> list[Array]:
         height, width = frame.shape[:2]
-        features: list[np.ndarray] = []
+        features: list[Array] = []
         for det in detections:
             left, top, w, h = det.ltwh
             x1, y1 = max(int(left), 0), max(int(top), 0)

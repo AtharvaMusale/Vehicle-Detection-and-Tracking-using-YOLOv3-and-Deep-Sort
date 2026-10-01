@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 
 from vehicle_tracking.config import DetectorConfig
-from vehicle_tracking.types import Detection
+from vehicle_tracking.types import Array, Detection
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class YoloV3Detector:
         self._output_layers = list(self._net.getUnconnectedOutLayersNames())
         logger.info("Loaded YOLOv3 (%d output layers)", len(self._output_layers))
 
-    def detect(self, frame: np.ndarray) -> list[Detection]:
+    def detect(self, frame: Array) -> list[Detection]:
         height, width = frame.shape[:2]
         size = self.config.input_size
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (size, size), swapRB=True, crop=False)
@@ -48,9 +48,7 @@ class YoloV3Detector:
         outputs = self._net.forward(self._output_layers)
         return self._postprocess([np.asarray(o) for o in outputs], width, height)
 
-    def _postprocess(
-        self, outputs: Sequence[np.ndarray], width: int, height: int
-    ) -> list[Detection]:
+    def _postprocess(self, outputs: Sequence[Array], width: int, height: int) -> list[Detection]:
         boxes: list[list[int]] = []
         scores: list[float] = []
         class_ids: list[int] = []

@@ -10,7 +10,7 @@ import numpy as np
 from vehicle_tracking.config import RenderConfig
 from vehicle_tracking.counter import CountEvent, LaneCounter
 from vehicle_tracking.lanes import Lane
-from vehicle_tracking.types import TrackedVehicle
+from vehicle_tracking.types import Array, TrackedVehicle
 
 FONT = cv2.FONT_HERSHEY_DUPLEX
 CLASS_COLORS = {  # BGR
@@ -35,18 +35,18 @@ class Renderer:
             lambda: deque(maxlen=max(config.trail_length, 2))
         )
         self._flash: dict[str, int] = {}
-        self._lane_layer: np.ndarray | None = None
-        self._lane_mask: np.ndarray | None = None
+        self._lane_layer: Array | None = None
+        self._lane_mask: Array | None = None
 
     # -- public -----------------------------------------------------------------
     def draw(
         self,
-        frame: np.ndarray,
+        frame: Array,
         tracks: list[TrackedVehicle],
         counter: LaneCounter,
         events: list[CountEvent],
         fps: float | None = None,
-    ) -> np.ndarray:
+    ) -> Array:
         for event in events:
             self._flash[event.lane] = FLASH_FRAMES
         out = self._draw_lanes(frame)
@@ -59,7 +59,7 @@ class Renderer:
         return out
 
     # -- lanes ------------------------------------------------------------------
-    def _draw_lanes(self, frame: np.ndarray) -> np.ndarray:
+    def _draw_lanes(self, frame: Array) -> Array:
         if self._lane_layer is None or self._lane_layer.shape != frame.shape:
             layer = np.zeros_like(frame)
             for lane in self.lanes:
@@ -68,9 +68,9 @@ class Renderer:
             self._lane_layer = layer
             self._lane_mask = np.asarray(layer.any(axis=2))
         mask = self._lane_mask
-        out: np.ndarray = frame.copy()
+        out: Array = frame.copy()
         alpha = self.config.lane_opacity
-        blended: np.ndarray = cv2.addWeighted(frame, 1 - alpha, self._lane_layer, alpha, 0)
+        blended: Array = cv2.addWeighted(frame, 1 - alpha, self._lane_layer, alpha, 0)
         out[mask] = blended[mask]
         for lane in self.lanes:
             pts = np.array([_ipoint(p) for p in lane.polygon], dtype=np.int32)
@@ -84,7 +84,7 @@ class Renderer:
         return out
 
     # -- vehicles ---------------------------------------------------------------
-    def _draw_trails(self, frame: np.ndarray, tracks: list[TrackedVehicle]) -> None:
+    def _draw_trails(self, frame: Array, tracks: list[TrackedVehicle]) -> None:
         live = {t.track_id for t in tracks}
         for track in tracks:
             self._trails[track.track_id].append(_ipoint(track.anchor))
@@ -97,7 +97,7 @@ class Renderer:
                 fade = i / len(pts)
                 cv2.line(frame, pts[i - 1], pts[i], color, max(1, int(3 * fade)), cv2.LINE_AA)
 
-    def _draw_vehicle(self, frame: np.ndarray, track: TrackedVehicle) -> None:
+    def _draw_vehicle(self, frame: Array, track: TrackedVehicle) -> None:
         color = CLASS_COLORS.get(track.label, DEFAULT_COLOR)
         x1, y1, x2, y2 = (int(v) for v in track.ltrb)
         arm = max(8, min(x2 - x1, y2 - y1) // 4)
@@ -111,7 +111,7 @@ class Renderer:
         cv2.putText(frame, text, (x1 + 5, top + th + 2), FONT, 0.45, (20, 20, 20), 1, cv2.LINE_AA)
 
     # -- HUD --------------------------------------------------------------------
-    def _draw_hud(self, frame: np.ndarray, counter: LaneCounter, fps: float | None) -> None:
+    def _draw_hud(self, frame: Array, counter: LaneCounter, fps: float | None) -> None:
         row_h = 26
         width = 280
         height = 70 + row_h * len(self.lanes) + 22

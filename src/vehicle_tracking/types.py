@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
+
+Array = npt.NDArray[Any]
 
 
 @dataclass(frozen=True)
@@ -31,5 +35,5 @@ class TrackedVehicle:
         left, _, right, bottom = self.ltrb
         return ((left + right) / 2.0, bottom)
 
-    def anchor_array(self) -> np.ndarray:
+    def anchor_array(self) -> Array:
         return np.asarray(self.anchor, dtype=np.float32)

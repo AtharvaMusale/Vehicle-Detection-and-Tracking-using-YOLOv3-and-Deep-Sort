@@ -11,6 +11,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from vehicle_tracking.types import Array
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +34,7 @@ class VideoReader:
         if start_seconds > 0:
             self._cap.set(cv2.CAP_PROP_POS_MSEC, start_seconds * 1000)
 
-    def __iter__(self) -> Iterator[np.ndarray]:
+    def __iter__(self) -> Iterator[Array]:
         while True:
             ok, frame = self._cap.read()
             if not ok:
@@ -70,7 +72,7 @@ class VideoWriter:
                 (width, height),
             )
 
-    def write(self, frame: np.ndarray) -> None:
+    def write(self, frame: Array) -> None:
         if self._ffmpeg is not None and self._ffmpeg.stdin is not None:
             self._ffmpeg.stdin.write(np.ascontiguousarray(frame).tobytes())
         elif self._cv is not None:

@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 
-import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 from vehicle_tracking.config import TrackerConfig
 from vehicle_tracking.encoder import ColorHistogramEncoder
-from vehicle_tracking.types import Detection, TrackedVehicle
+from vehicle_tracking.types import Array, Detection, TrackedVehicle
 
 
 class VehicleTracker:
@@ -24,7 +23,7 @@ class VehicleTracker:
         )
         self._votes: dict[int, Counter[str]] = defaultdict(Counter)
 
-    def update(self, frame: np.ndarray, detections: list[Detection]) -> list[TrackedVehicle]:
+    def update(self, frame: Array, detections: list[Detection]) -> list[TrackedVehicle]:
         embeds = self._encoder.encode(frame, detections)
         raw = [(list(d.ltwh), d.score, d.label) for d in detections]
         tracks = self._deepsort.update_tracks(raw, embeds=embeds, frame=frame)
