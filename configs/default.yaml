@@ -1,0 +1,39 @@
+# Lane geometry is normalised: x and y are fractions (0-1) of frame width/height.
+# Tune with:  vehicle-tracking preview-lanes --video <file> --at 5
+# Paths below are relative to the project root.
+
+detector:
+  cfg_path: models/yolov3.cfg
+  weights_path: models/yolov3.weights
+  input_size: 416
+  score_threshold: 0.3
+  nms_threshold: 0.45
+  classes: [car, bus, truck, motorbike]
+
+tracker:
+  max_age: 30
+  n_init: 3
+  max_iou_distance: 0.7
+  max_cosine_distance: 0.4
+
+video:
+  process_width: 1280
+  detect_every: 1
+
+render:
+  trail_length: 30
+  lane_opacity: 0.18
+  show_hud: true
+
+# Optional: only vehicles whose bottom-centre is inside this polygon are tracked.
+# Here it excludes the oncoming carriageway behind the central barrier.
+roi: [[0.0, 1.0], [0.0, 0.70], [0.36, 0.34], [0.60, 0.30], [1.0, 0.95], [1.0, 1.0]]
+
+# Counting happens when a vehicle's bottom-centre crosses a lane's `line`.
+lanes:
+  - name: Left lane
+    polygon: [[0.20, 0.45], [0.48, 0.45], [0.48, 0.95], [0.02, 0.95]]
+    line: [[0.10, 0.75], [0.48, 0.75]]
+  - name: Right lane
+    polygon: [[0.52, 0.45], [0.80, 0.45], [0.98, 0.95], [0.52, 0.95]]
+    line: [[0.52, 0.75], [0.90, 0.75]]

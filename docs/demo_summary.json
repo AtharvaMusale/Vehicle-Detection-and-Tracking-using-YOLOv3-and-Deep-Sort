@@ -1,0 +1,22 @@
+{
+  "total": 10,
+  "lanes": {
+    "Left lane": {
+      "total": 6,
+      "by_class": {
+        "car": 5,
+        "bus": 1
+      }
+    },
+    "Right lane": {
+      "total": 4,
+      "by_class": {
+        "car": 4
+      }
+    }
+  },
+  "frames": 415,
+  "seconds": 73.91,
+  "processing_fps": 5.62,
+  "video": "/Users/atharvamusale/Downloads/traffic.mp4"
+}
